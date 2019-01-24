@@ -1,10 +1,9 @@
 package com.vladavekin.controller;
 
-import com.vladavekin.domain.DataJson;
-import com.vladavekin.repos.DataJsonRepos;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import com.google.gson.Gson;
+import com.vladavekin.domain.DataDomain;
+import com.vladavekin.modell.DataModel;
+import com.vladavekin.repos.DataDomainRepos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,57 +22,47 @@ import java.io.IOException;
 public class IndexController implements WebMvcConfigurer {
 
     @Autowired
-    private DataJsonRepos dataRepos;
+    private DataDomainRepos dataDomainRepos;
 
-    private OkHttpClient client = new OkHttpClient();
+    private OkHttpController okhc = new OkHttpController();
 
     @GetMapping()
     public String index(@RequestParam(required = false) String data,
-                        @Valid DataJson dataJson,
+                        @Valid DataDomain dataDomain,
                         Model model) throws IOException {
 
-        if (!StringUtils.isEmpty(data)){
-            addDB(data, dataJson);
-        }
+        addDB(data, dataDomain);
 
         getDataJsons(model);
 
         return "index";
-    }
-
-    private void getDataJsons(Model model) {
-        Iterable<DataJson> dataJsons = dataRepos.findAll();
-        model.addAttribute("dataJsons", dataJsons);
     }
 
     @PostMapping()
     public String addData(@RequestParam("data") String data,
-                          @Valid DataJson dataJson,
+                          @Valid DataDomain dataDomain,
                           Model model) throws IOException {
 
-        addDB(data, dataJson);
+        addDB(data, dataDomain);
 
         getDataJsons(model);
 
         return "index";
     }
 
-    private void addDB(@RequestParam("data") String data,
-                       @Valid DataJson dataJson) throws IOException {
-        String res = post(data);
+    private void addDB(@RequestParam("data") String data, @Valid DataDomain dataDomain) throws IOException {
+        if (!StringUtils.isEmpty(data)){
+            String json = okhc.post(data);
+            DataModel dataModel = new Gson().fromJson(json, DataModel.class);
 
-        dataJson.setData(res);
-
-        dataRepos.save(dataJson);
+            dataDomain.setDataModel(dataModel);
+            dataDomainRepos.save(dataDomain);
+        }
     }
 
-    private String post(String url) throws IOException {
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-        try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
-        }
+    private void getDataJsons(Model model) {
+        Iterable<DataDomain> dataJsons = dataDomainRepos.findAll();
+        model.addAttribute("dataJsons", dataJsons);
     }
 
 }

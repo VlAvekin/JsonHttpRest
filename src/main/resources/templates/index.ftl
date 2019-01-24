@@ -24,7 +24,7 @@
                     </div>
                 </div>
             </form>
-            <hr>
+            <hr/>
 
             <table class="table table-striped" id="data-list">
                 <thead>
@@ -33,13 +33,15 @@
                     <th scope="col">Data Json</th>
                 </tr>
                 </thead>
-                <tbody>
-                <#list dataJsons as data>
-                <tr id="list-col">
-                    <td scope="row">${data.id}</td>
-                    <td>${data.data}</td>
-                </tr>
-                </#list>
+                <tbody id="list-col">
+                <#if dataJsons??>
+                    <#list dataJsons as data>
+                    <tr>
+                        <td scope="row">${data.id}</td>
+                        <td>${data.dataModel}</td>
+                    </tr>
+                    </#list>
+                </#if>
                 </tbody>
             </table>
         </div>

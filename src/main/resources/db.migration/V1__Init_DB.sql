@@ -1,7 +1,7 @@
 create sequence hibernate_sequence start 1 increment 1
 
-create table data_json (
+create table data_domain (
   id int8 not null,
-  data text,
+  data_model bytea,
   primary key (id)
- );
+);
